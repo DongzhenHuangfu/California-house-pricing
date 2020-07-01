@@ -247,8 +247,4 @@ if __name__ == '__main__':
 				else:
 					k += 1
 					arg_max[k] = min_error
-	print(selected_features, arg_max[len(selected_features)])
-
-
-	features = ['Latitude', 'Longitude']
-	w, error, mu, divid = train_features(features, house_train, 1000)
+	print(selected_features, arg_max[len(selected_features)]) # ['MedInc', 'Latitude', 'AveRooms', 'AveBedrms', 'AveOccup', 'Longitude'] 0.6965883118640933
