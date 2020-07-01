@@ -144,34 +144,51 @@ def train_features(features, house_train, n_iteration):
 	error = np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
 	return model.w, error, mu, divid
 
+def fit_feature_best(selected_features, feature, data, n_iter):
+	now_features = copy.deepcopy(selected_features)
+	now_features.append(feature)
+	w, error, mu, divid = train_features(now_features, data, n_iter)
+	return w, error, mu, divid, feature
+
 def find_best_feature(data, n_iter, selected_features, all_features):
-	min_error = float('inf')
+	Pool = mp.Pool(8)	
+	results = []
 	for feature in all_features:
 		if feature in selected_features:
 			continue
-		now_features = copy.deepcopy(selected_features)
-		now_features.append(feature)
-		w, error, mu, divid = train_features(now_features, data, n_iter)
-		if error < min_error:
-			min_error = error
-			best_feature = feature
-			best_w = w
-			best_mu = mu
-			best_divid = divid
+		results.append(Pool.apply_async(fit_feature_best, (selected_features, feature, data, n_iter,)))
+	Pool.close()
+	Pool.join()
+	min_error = float('inf')
+	for res in results:
+		if res.get()[1] < min_error:
+			min_error = res.get()[1]
+			best_feature = res.get()[4]
+			best_w = res.get()[0]
+			best_mu = res.get()[2]
+			best_divid = res.get()[3]
 	return best_feature, min_error, best_w, best_mu, best_divid
 
+def fit_feature_least(selected_features, feature, data, n_iter):
+	now_features = copy.deepcopy(selected_features)
+	now_features.remove(feature)
+	w, error, mu, divid = train_features(now_features, data, n_iter)
+	return w, error, mu, divid, feature
+
 def find_least_feature(data, n_iter, selected_features):
+	Pool = mp.Pool(8)
+	results = []
 	max_error = -float('inf')
 	for feature in selected_features:
-		now_features = copy.deepcopy(selected_features)
-		now_features.remove(feature)
-		w, error, mu, divid = train_features(now_features, data, n_iter)
-		if error > max_error:
-			max_error = error
-			least_feature = feature
-			least_w = w
-			least_mu = mu
-			least_divid = divid
+		results.append(Pool.apply_async(fit_feature_least, (selected_features, feature, data, n_iter, )))
+
+	for res in results:
+		if res.get()[1] > max_error:
+			max_error = res.get()[1]
+			least_feature = res.get()[4]
+			least_w = res.get()[0]
+			least_mu = res.get()[2]
+			least_divid = res.get()[3]
 	return least_feature, max_error, least_w, least_mu, least_divid
 
 if __name__ == '__main__':
@@ -191,7 +208,7 @@ if __name__ == '__main__':
 	max_features = 6
 	k = 0
 	arg_max = [0 for _ in range(max_features+1)]
-	iters = 10
+	iters = 50
 
 	while k < max_features:
 		print(k)
