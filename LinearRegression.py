@@ -124,7 +124,7 @@ def trans_xi(data, factors, max_grade=4, show=False):
 def standardization(X, mu, sigma):
     return ((X - mu) / sigma).astype(np.float16)
 
-def train_features(features, house_train):
+def train_features(features, house_train, n_iteration):
 	X = trans_xi(house_train, features)
 	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
 
@@ -138,7 +138,7 @@ def train_features(features, house_train):
 
 	x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, X_Stand, Y)
 
-	model = LinearRegression(3000, 0.001, 0.5, 0.0001, 128)
+	model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
 	model.fit(x_train, y_train)
 
 	error = np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
@@ -158,4 +158,4 @@ if __name__ == '__main__':
 	house_train, house_test = seperate_random_pandas(0.2, house)
 
 	features = ['Latitude', 'Longitude']
-	w, error, mu, divid = train_features(features, house_train)
+	w, error, mu, divid = train_features(features, house_train, 1000)
