@@ -48,7 +48,7 @@ class LinearRegression():
                 self.fit_batch(offset, X, y)
             error = np.mean(0.5 * (self.prediction(X) - y) ** 2)
             self.training_errors.append(error)
-            print('iter: ',error)
+            # print('iter: ',error)
             if error < self.tolerant:
                 print('break')
                 break
@@ -144,6 +144,36 @@ def train_features(features, house_train, n_iteration):
 	error = np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
 	return model.w, error, mu, divid
 
+def find_best_feature(data, n_iter, selected_features, all_features):
+	min_error = float('inf')
+	for feature in all_features:
+		if feature in selected_features:
+			continue
+		now_features = copy.deepcopy(selected_features)
+		now_features.append(feature)
+		w, error, mu, divid = train_features(now_features, data, n_iter)
+		if error < min_error:
+			min_error = error
+			best_feature = feature
+			best_w = w
+			best_mu = mu
+			best_divid = divid
+	return best_feature, min_error, best_w, best_mu, best_divid
+
+def find_least_feature(data, n_iter, selected_features):
+	max_error = -float('inf')
+	for feature in selected_features:
+		now_features = copy.deepcopy(selected_features)
+		now_features.remove(feature)
+		w, error, mu, divid = train_features(now_features, data, n_iter)
+		if error > max_error:
+			max_error = error
+			least_feature = feature
+			least_w = w
+			least_mu = mu
+			least_divid = divid
+	return least_feature, max_error, least_w, least_mu, least_divid
+
 if __name__ == '__main__':
 	all_features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
 
@@ -156,6 +186,52 @@ if __name__ == '__main__':
 	print(house.describe())
 
 	house_train, house_test = seperate_random_pandas(0.2, house)
+
+	selected_features = []
+	max_features = 6
+	k = 0
+	arg_max = [0 for _ in range(max_features+1)]
+	iters = 10
+
+	while k < max_features:
+		print(k)
+		best_feature, min_error, best_w, best_mu, best_divid = find_best_feature(house_train, iters, selected_features, all_features)
+		selected_features.append(best_feature)
+
+		if k < 2:
+			k += 1
+			arg_max[k] = min_error
+		else:
+			least_feature, max_error, least_w, least_mu, least_divid_r = find_least_feature(house_train, iters, selected_features)
+			if least_feature == best_feature:
+				k += 1
+				arg_max[k] = min_error
+			else:
+				handle_features = copy.deepcopy(selected_features)
+				handle_features.remove(least_feature)
+				if max_error < arg_max[k]:
+					if k == 2:
+						arg_max[k] = max_error
+						k += 1
+					else:
+						stop = False
+						while not stop:
+							feature_s, error_s, w_s, mu_s, divid_s = find_least_feature(house_train, iters, features)
+							if error_s >= arg_max[k-1]:
+								selected_features = copy.deepcopy(handle_features)
+								arg_max[k] = max_error
+								stop = True
+							else:
+								features.remove(feature_s)
+								k -= 1
+								if k == 2:
+									selected_features = copy.deepcopy(handle_features)
+									stop = True
+				else:
+					k += 1
+					arg_max[k] = min_error
+	print(selected_features, arg_max[len(selected_features)])
+
 
 	features = ['Latitude', 'Longitude']
 	w, error, mu, divid = train_features(features, house_train, 1000)
