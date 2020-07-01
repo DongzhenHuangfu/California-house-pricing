@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import copy
 from tqdm import tqdm
+import multiprocessing as mp
 
 ## define a class for linear regretion
 class LinearRegression():
@@ -44,24 +45,27 @@ class LinearRegression():
             np.random.set_state(state)
             np.random.shuffle(y)
             for offset in range(0, m_samples, self.batch_size):
-                end = offset + self.batch_size
-                x_batch = X[offset:end]
-                y_batch = y[offset:end]
-                y_pred = self.prediction(x_batch)
-                # Calculate the loss
-                error = np.sum(0.5 * (y_pred - y_batch) ** 2)
-                loss = error + self.regularization()
-#                 print('batch: ', error, loss)
-                # Calculate the gradient
-                w_grad = x_batch.T.dot(y_pred - y_batch) + self.alpha * self.w
-                # Update the weight
-                self.w -= self.learning_rate * w_grad
+                self.fit_batch(offset, X, y)
             error = np.mean(0.5 * (self.prediction(X) - y) ** 2)
             self.training_errors.append(error)
             print('iter: ',error)
             if error < self.tolerant:
                 print('break')
                 break
+
+    def fit_batch(self, offset, X, y):
+    	end = offset + self.batch_size
+    	x_batch = X[offset:end]
+    	y_batch = y[offset:end]
+    	y_pred = self.prediction(x_batch)
+    	# Calculate the loss
+    	error = np.sum(0.5 * (y_pred - y_batch) ** 2)
+    	loss = error + self.regularization()
+    	# print('batch: ', error, loss)
+    	# Calculate the gradient
+    	w_grad = x_batch.T.dot(y_pred - y_batch) + self.alpha * self.w
+    	# Update the weight
+    	self.w -= self.learning_rate * w_grad
 
 def seperate_random_pandas(percent, data):
     rand_data = data.sample(frac=1.0)
