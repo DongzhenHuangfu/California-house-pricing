@@ -124,18 +124,9 @@ def trans_xi(data, factors, max_grade=4, show=False):
 def standardization(X, mu, sigma):
     return ((X - mu) / sigma).astype(np.float16)
 
-if __name__ == '__main__':
-	print("Downloading the data...")
-	price = sklearn.datasets.fetch_california_housing(as_frame=True)
-	print("Finish!")
-
-	house = price['frame']
-	print(house.info())
-	print(house.describe())
-
-	features = ['Latitude', 'Longitude']
-	X = trans_xi(house, features)
-	Y = house['MedHouseVal'].values.reshape((house['MedHouseVal'].values.size, 1))
+def train_features(features, house_train):
+	X = trans_xi(house_train, features)
+	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
 
 	mu = X.mean(axis=0)
 	divid = X.max(axis=0) - X.min(axis=0)
@@ -145,8 +136,26 @@ if __name__ == '__main__':
 
 	X_Stand = standardization(X, mu, divid)
 
-	Train_x, Test_x, Train_y, Test_y = seperate_random_np(0.2, X_Stand, Y)
-	x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, Train_x, Train_y)
+	x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, X_Stand, Y)
 
 	model = LinearRegression(3000, 0.001, 0.5, 0.0001, 128)
 	model.fit(x_train, y_train)
+
+	error = np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
+	return model.w, error, mu, divid
+
+if __name__ == '__main__':
+	all_features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
+
+	print("Downloading the data...")
+	price = sklearn.datasets.fetch_california_housing(as_frame=True)
+	print("Finish!")
+
+	house = price['frame']
+	print(house.info())
+	print(house.describe())
+
+	house_train, house_test = seperate_random_pandas(0.2, house)
+
+	features = ['Latitude', 'Longitude']
+	w, error, mu, divid = train_features(features, house_train)
