@@ -6,7 +6,7 @@ import pickle
 app = FastAPI()
 
 def trans_xi(data, max_grade=4, show=False):
-    ret = np.ones(shape=(len(data), pow(max_grade+1, len(data))), dtype=np.float64)
+    ret = np.ones((1, pow(max_grade+1, len(data))), dtype=np.float64)
     for i in range(len(data)):
         for grade in range(max_grade+1):
             if i == 0:
@@ -29,9 +29,9 @@ with open("./model.pickle", 'rb') as f:
 @app.get("/house-pricing/")
 async def read_items(features: List[float]):
 	input = np.array(features, dtype=np.float16)
-	
+
 	X = trans_xi(input)
 	X_stand = ((X - mu) / divid).astype(np.float16)
 
-	price = X_stand.dot(w)[0]
+	price = X_stand.dot(w)[0, 0]
 	return {price}
