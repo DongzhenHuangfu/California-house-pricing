@@ -140,7 +140,6 @@ def train_features(features, house_train, n_iteration):
 
 	for i in range(5):
 		x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, X_Stand, Y)
-
 		model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
 		model.fit(x_train, y_train)
 		error_sum += np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
@@ -188,24 +187,10 @@ def find_least_feature(data, n_iter, selected_features):
 			least_feature = res.get()[1]
 	return least_feature, max_error
 
-if __name__ == '__main__':
-	all_features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
-
-	print("Downloading the data...")
-	price = sklearn.datasets.fetch_california_housing(as_frame=True)
-	print("Finish!")
-
-	house = price['frame']
-	print(house.info())
-	print(house.describe())
-
-	house_train, house_test = seperate_random_pandas(0.2, house)
-
+def SFFS(all_features, house_train, max_features=6, iters=1000):
 	selected_features = []
-	max_features = 6
 	k = 0
 	arg_max = [0 for _ in range(max_features+1)]
-	iters = 50
 
 	while k < max_features:
 		print(k)
@@ -244,4 +229,22 @@ if __name__ == '__main__':
 				else:
 					k += 1
 					arg_max[k] = min_error
-	print(selected_features, arg_max[len(selected_features)]) # ['MedInc', 'Latitude', 'AveRooms', 'AveBedrms', 'AveOccup', 'Longitude'] 0.6965883118640933
+	return selected_features, arg_max[len(selected_features)]
+
+if __name__ == '__main__':
+	all_features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
+
+	print("Downloading the data...")
+	price = sklearn.datasets.fetch_california_housing(as_frame=True)
+	print("Finish!")
+
+	house = price['frame']
+	print(house.info())
+	print(house.describe())
+
+	house_train, house_test = seperate_random_pandas(0.2, house)
+	max_features = 6
+	iters = 3000
+
+	selected_features, error = SFFS(all_features, house_train, max_features, iters)
+	print(selected_features, error)
