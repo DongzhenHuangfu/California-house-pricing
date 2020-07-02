@@ -124,6 +124,7 @@ def trans_xi(data, factors, max_grade=4, show=False):
 def standardization(X, mu, sigma):
     return ((X - mu) / sigma).astype(np.float16)
 
+## use Monte-Carlo Cross validation
 def train_features(features, house_train, n_iteration):
 	X = trans_xi(house_train, features)
 	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
@@ -135,23 +136,25 @@ def train_features(features, house_train, n_iteration):
 	divid[0] = 1
 
 	X_Stand = standardization(X, mu, divid)
+	error_sum = 0
 
-	x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, X_Stand, Y)
+	for i in range(5):
+		x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, X_Stand, Y)
 
-	model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
-	model.fit(x_train, y_train)
+		model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
+		model.fit(x_train, y_train)
+		error_sum += np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
 
-	error = np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
-	return model.w, error, mu, divid
+	return error_sum/5
 
 def fit_feature_best(selected_features, feature, data, n_iter):
 	now_features = copy.deepcopy(selected_features)
 	now_features.append(feature)
-	w, error, mu, divid = train_features(now_features, data, n_iter)
-	return w, error, mu, divid, feature
+	error = train_features(now_features, data, n_iter)
+	return error, feature
 
 def find_best_feature(data, n_iter, selected_features, all_features):
-	Pool = mp.Pool(8)	
+	Pool = mp.Pool(4)	
 	results = []
 	for feature in all_features:
 		if feature in selected_features:
@@ -161,19 +164,16 @@ def find_best_feature(data, n_iter, selected_features, all_features):
 	Pool.join()
 	min_error = float('inf')
 	for res in results:
-		if res.get()[1] < min_error:
-			min_error = res.get()[1]
-			best_feature = res.get()[4]
-			best_w = res.get()[0]
-			best_mu = res.get()[2]
-			best_divid = res.get()[3]
-	return best_feature, min_error, best_w, best_mu, best_divid
+		if res.get()[0] < min_error:
+			min_error = res.get()[0]
+			best_feature = res.get()[1]
+	return best_feature, min_error
 
 def fit_feature_least(selected_features, feature, data, n_iter):
 	now_features = copy.deepcopy(selected_features)
 	now_features.remove(feature)
-	w, error, mu, divid = train_features(now_features, data, n_iter)
-	return w, error, mu, divid, feature
+	error = train_features(now_features, data, n_iter)
+	return error, feature
 
 def find_least_feature(data, n_iter, selected_features):
 	Pool = mp.Pool(8)
@@ -183,13 +183,10 @@ def find_least_feature(data, n_iter, selected_features):
 		results.append(Pool.apply_async(fit_feature_least, (selected_features, feature, data, n_iter, )))
 
 	for res in results:
-		if res.get()[1] > max_error:
-			max_error = res.get()[1]
-			least_feature = res.get()[4]
-			least_w = res.get()[0]
-			least_mu = res.get()[2]
-			least_divid = res.get()[3]
-	return least_feature, max_error, least_w, least_mu, least_divid
+		if res.get()[0] > max_error:
+			max_error = res.get()[0]
+			least_feature = res.get()[1]
+	return least_feature, max_error
 
 if __name__ == '__main__':
 	all_features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
@@ -212,14 +209,14 @@ if __name__ == '__main__':
 
 	while k < max_features:
 		print(k)
-		best_feature, min_error, best_w, best_mu, best_divid = find_best_feature(house_train, iters, selected_features, all_features)
+		best_feature, min_error = find_best_feature(house_train, iters, selected_features, all_features)
 		selected_features.append(best_feature)
 
 		if k < 2:
 			k += 1
 			arg_max[k] = min_error
 		else:
-			least_feature, max_error, least_w, least_mu, least_divid_r = find_least_feature(house_train, iters, selected_features)
+			least_feature, max_error = find_least_feature(house_train, iters, selected_features)
 			if least_feature == best_feature:
 				k += 1
 				arg_max[k] = min_error
@@ -233,7 +230,7 @@ if __name__ == '__main__':
 					else:
 						stop = False
 						while not stop:
-							feature_s, error_s, w_s, mu_s, divid_s = find_least_feature(house_train, iters, features)
+							feature_s, error_s = find_least_feature(house_train, iters, features)
 							if error_s >= arg_max[k-1]:
 								selected_features = copy.deepcopy(handle_features)
 								arg_max[k] = max_error
