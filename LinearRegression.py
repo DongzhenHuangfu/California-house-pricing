@@ -4,6 +4,7 @@ import pandas as pd
 import copy
 from tqdm import tqdm
 import multiprocessing as mp
+import pickle
 
 ## define a class for linear regretion
 class LinearRegression():
@@ -153,7 +154,7 @@ def fit_feature_best(selected_features, feature, data, n_iter):
 	return error, feature
 
 def find_best_feature(data, n_iter, selected_features, all_features):
-	Pool = mp.Pool(4)	
+	Pool = mp.Pool(8)	
 	results = []
 	for feature in all_features:
 		if feature in selected_features:
@@ -243,8 +244,38 @@ if __name__ == '__main__':
 	print(house.describe())
 
 	house_train, house_test = seperate_random_pandas(0.2, house)
-	max_features = 6
-	iters = 3000
+	# max_features = 4
+	# iters = 1000
 
-	selected_features, error = SFFS(all_features, house_train, max_features, iters)
-	print(selected_features, error)# ['MedInc', 'Latitude', 'AveRooms', 'AveBedrms', 'AveOccup', 'Longitude'] 0.6965883118640933
+	# selected_features, error = SFFS(all_features, house_train, max_features, iters)
+	# print(selected_features) #['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
+
+
+	selected_features = ['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
+	X = trans_xi(house_train, selected_features)
+	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
+	n_iteration = 200
+
+	mu = X.mean(axis=0)
+	divid = X.max(axis=0) - X.min(axis=0)
+
+	mu[0] = 0
+	divid[0] = 1
+
+	X = standardization(X, mu, divid)
+
+	model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
+	model.fit(X, Y)
+
+	x_test = trans_xi(house_test, selected_features)
+	x_test = standardization(x_test, mu, divid)
+	y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
+
+	y_pred = model.prediction(x_test)
+
+	error = np.mean(0.5*(y_pred - y_test)**2)
+	print(error) #0.3384877315359696
+	data = [model.w, model.training_errors, mu, divid]
+
+	with open("./model.pickle", 'wb') as f:
+		pickle.dump(data, f)
