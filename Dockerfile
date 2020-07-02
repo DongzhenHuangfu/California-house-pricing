@@ -1,6 +1,6 @@
 FROM python:3.8
 
-RUN pip install fastapi uvicorn numpy
+RUN pip install fastapi uvicorn numpy typing
 
 EXPOSE 5000
 
