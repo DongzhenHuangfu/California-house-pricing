@@ -247,4 +247,4 @@ if __name__ == '__main__':
 	iters = 3000
 
 	selected_features, error = SFFS(all_features, house_train, max_features, iters)
-	print(selected_features, error)
+	print(selected_features, error)# ['MedInc', 'Latitude', 'AveRooms', 'AveBedrms', 'AveOccup', 'Longitude'] 0.6965883118640933
