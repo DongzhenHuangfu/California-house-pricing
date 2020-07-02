@@ -20,7 +20,7 @@ def trans_xi(data, max_grade=4, show=False):
     return ret
 
 
-with open("./model.pickle", 'rb') as f:
+with open("app/model.pickle", 'rb') as f:
 	data = pickle.load(f)
 	w = data[0]
 	mu = data[2]
