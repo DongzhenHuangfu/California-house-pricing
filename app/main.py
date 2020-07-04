@@ -26,12 +26,18 @@ with open("app/model.pickle", 'rb') as f:
 	mu = data[2]
 	divid = data[3]
 
-@app.get("/house-pricing/")
-async def read_items(features: List[float]):
-	input = np.array(features, dtype=np.float16)
+@app.get("/house-pricing/{features}")
+async def read_items(features: str):
+    split_features = features.split(',')
+    if len(split_features) != 4:
+        return {"Dimension error: Need 4 features!"}
+    float_features = []
+    for feature in split_features:
+        float_features.append(float(feature))
+    input = np.array(float_features, dtype=np.float16)
 
-	X = trans_xi(input)
-	X_stand = ((X - mu) / divid).astype(np.float16)
+    X = trans_xi(input)
+    X_stand = ((X - mu) / divid).astype(np.float16)
 
-	price = X_stand.dot(w)[0, 0]
-	return {price}
+    price = X_stand.dot(w)[0, 0]
+    return {price}
