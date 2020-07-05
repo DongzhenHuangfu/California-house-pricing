@@ -1,5 +1,3 @@
-<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=default"></script>
-
 # California House Pricing - Multiple Regression
 
 In this project, I will try to model the "California House Pricing" data from scikit-learn. By doing the multiple regression, the house price will be predicted. Features will be selected by SFFS (Sequential Floating Forward Selection), and the Monte-Carlo Cross validation method will be implemented for model valication.
@@ -22,11 +20,11 @@ Let's do it!
 
 ## Correlation between features
 
-![Correlation between features](https://github.com/DongzhenHuangfu/California-house-pricing/blob/feature/presenting/figures/Pearson_Correlation.png)
+![Correlation between features](https://github.com/DongzhenHuangfu/California-house-pricing/blob/feature/presenting/figures/Correlation.png)
 
 Seems that the feature MedInc is most linear relevant to MedHouseVal:
 
-![Correlation between MedInc and MedHouseVal](https://github.com/DongzhenHuangfu/California-house-pricing/blob/feature/presenting/figures/Pearson_Correlation_Inc_Val.png)
+![Correlation between MedInc and MedHouseVal](https://github.com/DongzhenHuangfu/California-house-pricing/blob/feature/presenting/figures/Correlation_Inc_Val.png)
 
 ## Data isualization by position
 
@@ -118,3 +116,7 @@ or
 $$ \mathbf{\sigma} = std(\mathbf{x}) $$
 
 ## Result
+
+Selected features: ['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
+
+Error on Test data: 0.3384877315359696
