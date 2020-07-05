@@ -93,33 +93,28 @@ def seperate_random_np(percent, X, Y):
     
     return X2, X1, Y2, Y1
 
+## Get all possible combinations of powers for each feature
+def sum_combines(powers, max):
+	if len(powers) == 1:
+		return [[powers[0] + i] for i in range(max-powers[0]+1)]
+	else:
+		answers = []
+		while sum(powers) <= max:
+			for item in sum_combines(powers[1:], max-powers[0]):
+				item.append(powers[0])
+				answers.append(item)
+			powers[0] += 1
+	return answers
+
 def trans_xi(data, factors, max_grade=4, show=False):
-    ret = np.ones(shape=(len(data), pow(max_grade+1, len(factors))), dtype=np.float64)
-    if show:
-        with tqdm(total=pow(max_grade+1, len(factors))-max_grade-1) as pbar:
-            for i in range(len(factors)):
-                for grade in range(max_grade+1):
-                    if i == 0:
-                        if grade != 0:
-                            ret[:, grade] = data[factors[i]] * ret[:, grade-1]
-                    else:
-                        now_vec = ret[:, 0:pow(max_grade+1, i)]
-                        if grade != 0:
-                            for j in range(pow(max_grade+1, i)):
-                                ret[:, grade * pow(max_grade+1, i) + j] = now_vec[:, j] * pow(data[factors[i]], grade)
-                                pbar.update(1)
-    else:
-        for i in range(len(factors)):
-            for grade in range(max_grade+1):
-                if i == 0:
-                    if grade != 0:
-                        ret[:, grade] = data[factors[i]] * ret[:, grade-1]
-                else:
-                    now_vec = ret[:, 0:pow(max_grade+1, i)]
-                    if grade != 0:
-                        for j in range(pow(max_grade+1, i)):
-                            ret[:, grade * pow(max_grade+1, i) + j] = now_vec[:, j] * pow(data[factors[i]], grade)
-    return ret
+	combines = [1 for i in range(len(factors))]
+	power_combinations = sum_combines(combines, max_grade)
+	# print(power_combinations)
+	ret = np.ones(shape=(len(data), len(power_combinations)), dtype=np.float64)
+	for i in range(len(power_combinations)):
+		for j in range(len(power_combinations[i])):
+			ret[:, i] *= pow(data[factors[j]], power_combinations[i][j])
+	return ret
 
 ## standarization of the xi
 def standardization(X, mu, sigma):
@@ -132,9 +127,6 @@ def train_features(features, house_train, n_iteration):
 
 	mu = X.mean(axis=0)
 	divid = X.max(axis=0) - X.min(axis=0)
-
-	mu[0] = 0
-	divid[0] = 1
 
 	X_Stand = standardization(X, mu, divid)
 	error_sum = 0
@@ -154,7 +146,7 @@ def fit_feature_best(selected_features, feature, data, n_iter):
 	return error, feature
 
 def find_best_feature(data, n_iter, selected_features, all_features):
-	Pool = mp.Pool(8)	
+	Pool = mp.Pool(8)
 	results = []
 	for feature in all_features:
 		if feature in selected_features:
@@ -244,38 +236,36 @@ if __name__ == '__main__':
 	print(house.describe())
 
 	house_train, house_test = seperate_random_pandas(0.2, house)
-	# max_features = 4
-	# iters = 1000
 
-	# selected_features, error = SFFS(all_features, house_train, max_features, iters)
-	# print(selected_features) #['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
+	for i in range(4):
+		max_features = 3
+		iters = 500
+		selected_features, error = SFFS(all_features, house_train, max_features, iters)
+		print(max_features, selected_features, error) #['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
 
 
-	selected_features = ['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
-	X = trans_xi(house_train, selected_features)
-	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
-	n_iteration = 200
+	# selected_features = ['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
+	# X = trans_xi(house_train, selected_features)
+	# Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
+	# n_iteration = 200
 
-	mu = X.mean(axis=0)
-	divid = X.max(axis=0) - X.min(axis=0)
+	# mu = X.mean(axis=0)
+	# divid = X.max(axis=0) - X.min(axis=0)
 
-	mu[0] = 0
-	divid[0] = 1
+	# X = standardization(X, mu, divid)
 
-	X = standardization(X, mu, divid)
+	# model = LinearRegression(n_iteration, 0.000001, 0.5, 0.0001, 128)
+	# model.fit(X, Y)
 
-	model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
-	model.fit(X, Y)
+	# x_test = trans_xi(house_test, selected_features)
+	# x_test = standardization(x_test, mu, divid)
+	# y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
 
-	x_test = trans_xi(house_test, selected_features)
-	x_test = standardization(x_test, mu, divid)
-	y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
+	# y_pred = model.prediction(x_test)
 
-	y_pred = model.prediction(x_test)
+	# error = np.mean(0.5*(y_pred - y_test)**2)
+	# print(error) #0.3384877315359696
+	# data = [model.w, model.training_errors, mu, divid]
 
-	error = np.mean(0.5*(y_pred - y_test)**2)
-	print(error) #0.3384877315359696
-	data = [model.w, model.training_errors, mu, divid]
-
-	with open("./model.pickle", 'wb') as f:
-		pickle.dump(data, f)
+	# with open("./model.pickle", 'wb') as f:
+	# 	pickle.dump(data, f)
