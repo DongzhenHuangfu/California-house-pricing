@@ -252,6 +252,7 @@ if __name__ == '__main__':
 	house = price['frame']
 	print(house.info())
 	print(house.describe())
+	print(house.head())
 
 	house_train, house_test = seperate_random_pandas(0.2, house)
 
@@ -264,30 +265,30 @@ if __name__ == '__main__':
 	# # [0.6609967278780459, 0.6614355403038658, 0.6654750112455751, 0.6968490754079162]
 
 
-	selected_features = ['MedInc', 'Population']
-	mus = []
-	sigmas = []
-	for feature in selected_features:
-		mus.append(house_train[feature].mean())
-		sigmas.append(house_train[feature].max() - house_train[feature].min())
+	# selected_features = ['MedInc', 'Population']
+	# mus = []
+	# sigmas = []
+	# for feature in selected_features:
+	# 	mus.append(house_train[feature].mean())
+	# 	sigmas.append(house_train[feature].max() - house_train[feature].min())
 
-	stand_house = standardization_pd(house_train, selected_features, mus, sigmas)
-	X = trans_xi(stand_house, selected_features)
-	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
-	n_iteration = 5000
+	# stand_house = standardization_pd(house_train, selected_features, mus, sigmas)
+	# X = trans_xi(stand_house, selected_features)
+	# Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
+	# n_iteration = 5000
 
-	model = LinearRegression(n_iteration, 0.00001, 0.5, 0.0001, 128)
-	model.fit(X, Y)
+	# model = LinearRegression(n_iteration, 0.00001, 0.5, 0.0001, 128)
+	# model.fit(X, Y)
 
-	stand_house_test = standardization_pd(house_test, selected_features, mus, sigmas)
-	x_test = trans_xi(stand_house_test, selected_features)
-	y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
+	# stand_house_test = standardization_pd(house_test, selected_features, mus, sigmas)
+	# x_test = trans_xi(stand_house_test, selected_features)
+	# y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
 
-	y_pred = model.prediction(x_test)
+	# y_pred = model.prediction(x_test)
 
-	error = np.mean(0.5*(y_pred - y_test)**2)
-	print(error) #0.353289660557462
-	data = [model.w, model.training_errors, mus, sigmas]
+	# error = np.mean(0.5*(y_pred - y_test)**2)
+	# print(error) #0.353289660557462
+	# data = [model.w, model.training_errors, mus, sigmas]
 
-	with open("./model.pickle", 'wb') as f:
-		pickle.dump(data, f)
+	# with open("./model.pickle", 'wb') as f:
+	# 	pickle.dump(data, f)
