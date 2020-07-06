@@ -117,6 +117,10 @@ or
 
 ## Result
 
-Selected features: ['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
+Selected features: ['MedInc', 'Population']
 
-Error on Test data: 0.3384877315359696
+Error on Test data: 0.3584877315359696
+
+Training process:
+
+![Training process](https://github.com/DongzhenHuangfu/California-house-pricing/blob/feature/presenting/figures/training_process.png)
