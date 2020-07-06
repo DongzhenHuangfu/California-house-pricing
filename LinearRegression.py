@@ -117,6 +117,12 @@ def trans_xi(data, factors, max_grade=4, show=False):
 			ret[:, i] *= pow(data[factors[j]], power_combinations[i][j])
 	return ret
 
+def standardization_pd(data, features, mu, sigma):
+	ret_data = copy.deepcopy(data)
+	for i in range(len(features)):
+		ret_data[features[i]] = (ret_data[features[i]] - mu[i]) / sigma[i] + 1
+	return ret_data
+
 ## standarization of the xi
 def standardization(X, mu, sigma):
     return ((X - mu) / sigma).astype(np.float16)
@@ -243,26 +249,26 @@ if __name__ == '__main__':
 	# print(max_features, selected_features, error) #['Longitude'], ['Longitude', 'Latitude'], ['AveBedrms', 'Population', 'Latitude'], ['AveRooms', 'MedInc', 'Population', 'Latitude']
 
 
-	selected_features = ['AveRooms', 'MedInc', 'Population', 'Latitude']
-	X = trans_xi(house_train, selected_features)
+	selected_features = ['Longitude', 'Latitude', 'MedInc', 'Population']
+	mus = []
+	sigmas = []
+	for feature in selected_features:
+		mus.append(house_train[feature].mean())
+		sigmas.append(house_train[feature].max() - house_train[feature].min())
+
+	stand_house = standardization_pd(house_train, selected_features, mus, sigmas)
+	X = trans_xi(stand_house, selected_features)
 	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
-	n_iteration = 500
+	n_iteration = 1000
 
 	mu = X.mean(axis=0)
 	divid = X.max(axis=0) - X.min(axis=0)
 
-	X = standardization(X, mu, divid)
-	print(X)
-	print(X.max(axis=0))
-	print(X.min(axis=0))
-	print(abs(X).max(axis=0))
-	print(abs(X).min(axis=0))
-
-	model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
+	model = LinearRegression(n_iteration, 0.000001, 0.5, 0.0001, 128)
 	model.fit(X, Y)
 
-	x_test = trans_xi(house_test, selected_features)
-	x_test = standardization(x_test, mu, divid)
+	stand_house_test = standardization_pd(house_test, selected_features, mus, sigmas)
+	x_test = trans_xi(stand_house_test, selected_features)
 	y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
 
 	y_pred = model.prediction(x_test)
