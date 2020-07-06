@@ -38,6 +38,9 @@ class LinearRegression():
         m_samples, n_features = X.shape
         self.init_weights(n_features)
         self.training_errors = []
+        error = np.mean(0.5 * (self.prediction(X) - y) ** 2)
+        print(error)
+        self.training_errors.append(error)
         
         for i in range(self.n_iters):
             ## shuffle the training data at each iter
@@ -129,17 +132,19 @@ def standardization(X, mu, sigma):
 
 ## use Monte-Carlo Cross validation
 def train_features(features, house_train, n_iteration):
-	X = trans_xi(house_train, features)
+	mus = []
+	sigmas = []
+	for feature in features:
+		mus.append(house_train[feature].mean())
+		sigmas.append(house_train[feature].max() - house_train[feature].min())
+	stand_data = standardization_pd(house_train, features, mus, sigmas)
+	X = trans_xi(stand_data, features)
 	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
 
-	mu = X.mean(axis=0)
-	divid = X.max(axis=0) - X.min(axis=0)
-
-	X_Stand = standardization(X, mu, divid)
 	error_sum = 0
 
 	for i in range(5):
-		x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, X_Stand, Y)
+		x_train, x_valid, y_train, y_valid = seperate_random_np(0.2, X, Y)
 		model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
 		model.fit(x_train, y_train)
 		error_sum += np.mean(0.5 * (model.prediction(x_valid) - y_valid) ** 2)
@@ -188,6 +193,7 @@ def find_least_feature(data, n_iter, selected_features):
 	return least_feature, max_error
 
 def SFFS(all_features, house_train, max_features=6, iters=1000):
+	all_selected_features = [[] for _ in range(max_features+1)]
 	selected_features = []
 	k = 0
 	arg_max = [0 for _ in range(max_features+1)]
@@ -200,17 +206,20 @@ def SFFS(all_features, house_train, max_features=6, iters=1000):
 		if k < 2:
 			k += 1
 			arg_max[k] = min_error
+			all_selected_features[k] = copy.deepcopy(selected_features)
 		else:
 			least_feature, max_error = find_least_feature(house_train, iters, selected_features)
 			if least_feature == best_feature:
 				k += 1
 				arg_max[k] = min_error
+				all_selected_features[k] = copy.deepcopy(selected_features)
 			else:
 				handle_features = copy.deepcopy(selected_features)
 				handle_features.remove(least_feature)
 				if max_error < arg_max[k]:
 					if k == 2:
 						arg_max[k] = max_error
+						all_selected_features[k] = copy.deepcopy(selected_features)
 						k += 1
 					else:
 						stop = False
@@ -219,6 +228,7 @@ def SFFS(all_features, house_train, max_features=6, iters=1000):
 							if error_s >= arg_max[k-1]:
 								selected_features = copy.deepcopy(handle_features)
 								arg_max[k] = max_error
+								all_selected_features[k] = copy.deepcopy(selected_features)
 								stop = True
 							else:
 								features.remove(feature_s)
@@ -229,7 +239,8 @@ def SFFS(all_features, house_train, max_features=6, iters=1000):
 				else:
 					k += 1
 					arg_max[k] = min_error
-	return selected_features, arg_max[len(selected_features)]
+					all_selected_features[k] = copy.deepcopy(selected_features)
+	return all_selected_features, arg_max
 
 if __name__ == '__main__':
 	all_features = ['MedInc', 'HouseAge', 'AveRooms', 'AveBedrms', 'Population', 'AveOccup', 'Latitude', 'Longitude']
@@ -244,12 +255,16 @@ if __name__ == '__main__':
 
 	house_train, house_test = seperate_random_pandas(0.2, house)
 
-	# iters = 500
-	# selected_features, error = SFFS(all_features, house_train, max_features, iters)
-	# print(max_features, selected_features, error) #['Longitude'], ['Longitude', 'Latitude'], ['AveBedrms', 'Population', 'Latitude'], ['AveRooms', 'MedInc', 'Population', 'Latitude']
+	# iters = 300
+	# max_features = 4
+	# all_selected_features, arg_error = SFFS(all_features, house_train, max_features, iters)
+	# print(all_selected_features) 
+	# # [['MedInc'], ['MedInc', 'Population'], ['MedInc', 'Population', 'AveBedrms'], ['MedInc', 'Population', 'AveBedrms', 'AveRooms']]
+	# print(arg_error)
+	# # [0.6609967278780459, 0.6614355403038658, 0.6654750112455751, 0.6968490754079162]
 
 
-	selected_features = ['Longitude', 'Latitude', 'MedInc', 'Population']
+	selected_features = ['MedInc', 'Population']
 	mus = []
 	sigmas = []
 	for feature in selected_features:
@@ -259,12 +274,12 @@ if __name__ == '__main__':
 	stand_house = standardization_pd(house_train, selected_features, mus, sigmas)
 	X = trans_xi(stand_house, selected_features)
 	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
-	n_iteration = 1000
+	n_iteration = 5000
 
 	mu = X.mean(axis=0)
 	divid = X.max(axis=0) - X.min(axis=0)
 
-	model = LinearRegression(n_iteration, 0.000001, 0.5, 0.0001, 128)
+	model = LinearRegression(n_iteration, 0.00001, 0.5, 0.0001, 128)
 	model.fit(X, Y)
 
 	stand_house_test = standardization_pd(house_test, selected_features, mus, sigmas)
