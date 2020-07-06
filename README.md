@@ -124,3 +124,11 @@ Error on Test data: 0.3584877315359696
 Training process:
 
 ![Training process](https://github.com/DongzhenHuangfu/California-house-pricing/blob/feature/presenting/figures/training_process.png)
+
+## FastAPI
+
+I also tried to build a API for this project. With docker, when you build a image and container, you can get a prediction while typing the adress in a form like:
+
+"127.0.0.1:5000/house-pricing/1,2"
+
+Where 1 is an example value of MedInc and 2 is an example value of Population.
