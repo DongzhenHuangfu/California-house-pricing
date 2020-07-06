@@ -46,15 +46,15 @@ Notice that there are two features called "Latitude" and Longitude, data can be 
 ### Data modeling
 Data will be modeled as:
 
-$$ f(x) = \sum_{\xi \in \Xi}\beta_{\xi}\xi(x) $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=f(x)&space;=&space;\sum_{\xi&space;\in&space;\Xi}\beta_{\xi}\xi(x)" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(x)&space;=&space;\sum_{\xi&space;\in&space;\Xi}\beta_{\xi}\xi(x)" title="f(x) = \sum_{\xi \in \Xi}\beta_{\xi}\xi(x)" /></a>
 
 where:
 
-$$ \xi(x) = \prod_{i \in \\{1, 2, ..., 8\\}}x_{i}^{\alpha_{\xi_{i}}} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\xi(x)&space;=&space;\prod_{i&space;\in&space;\\{1,&space;2,&space;...,&space;8\\}}x_{i}^{\alpha_{\xi_{i}}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\xi(x)&space;=&space;\prod_{i&space;\in&space;\\{1,&space;2,&space;...,&space;8\\}}x_{i}^{\alpha_{\xi_{i}}}" title="\xi(x) = \prod_{i \in \\{1, 2, ..., 8\\}}x_{i}^{\alpha_{\xi_{i}}}" /></a>
 
 and:
 
-$$ \Xi = \\{ \xi | \forall\alpha \in \mathbb{N}^{+8}: \sum_{i \in \\{1, 2, ..., 8\\}} \alpha_{\xi_{i}} \leq 4 \\} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\Xi&space;=&space;\{&space;\xi&space;|&space;\forall\alpha&space;\in&space;\mathbb{N}^{&plus;8}:&space;\sum_{i&space;\in&space;\\{1,&space;2,&space;...,&space;8\\}}&space;\alpha_{\xi_{i}}&space;\leq&space;4&space;\}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\Xi&space;=&space;\{&space;\xi&space;|&space;\forall\alpha&space;\in&space;\mathbb{N}^{&plus;8}:&space;\sum_{i&space;\in&space;\\{1,&space;2,&space;...,&space;8\\}}&space;\alpha_{\xi_{i}}&space;\leq&space;4&space;\}" title="\Xi = \{ \xi | \forall\alpha \in \mathbb{N}^{+8}: \sum_{i \in \\{1, 2, ..., 8\\}} \alpha_{\xi_{i}} \leq 4 \}" /></a>
 
 In that case, the model can be treated as a multiple linear regression.
 
@@ -67,53 +67,53 @@ Randomly select (without replacement) some fraction of your data to form the tra
 ### Multiple linear regression
 Consider a multiple linear function in the form:
 
-$$ f(\mathbf{x}) = \mathbf{w} * \mathbf{x} = \sum_{i=0}^{n}w_{i}x_{i} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=f(\mathbf{x})&space;=&space;\mathbf{w}&space;*&space;\mathbf{x}&space;=&space;\sum_{i=0}^{n}w_{i}x_{i}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?f(\mathbf{x})&space;=&space;\mathbf{w}&space;*&space;\mathbf{x}&space;=&space;\sum_{i=0}^{n}w_{i}x_{i}" title="f(\mathbf{x}) = \mathbf{w} * \mathbf{x} = \sum_{i=0}^{n}w_{i}x_{i}" /></a>
 
 Error will be calculated as:
 
-$$ e = 0.5 * (y - f(\mathbf{x}))^{2} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=e&space;=&space;0.5&space;*&space;(y&space;-&space;f(\mathbf{x}))^{2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?e&space;=&space;0.5&space;*&space;(y&space;-&space;f(\mathbf{x}))^{2}" title="e = 0.5 * (y - f(\mathbf{x}))^{2}" /></a>
 
 where (\mathbf{x}, y) is the training data.
 
 The gradient of the error is:
 
-$$ \mathbf{gradient} = \mathbf{x} * (y - f(\mathbf{x})) $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{gradient}&space;=&space;\mathbf{x}&space;*&space;(y&space;-&space;f(\mathbf{x}))" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{gradient}&space;=&space;\mathbf{x}&space;*&space;(y&space;-&space;f(\mathbf{x}))" title="\mathbf{gradient} = \mathbf{x} * (y - f(\mathbf{x}))" /></a>
 
 So the weights can be updated:
 
-$$ \mathbf{w} = \mathbf{w} - \mathbf{gradient} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{w}&space;=&space;\mathbf{w}&space;-&space;\mathbf{gradient}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{w}&space;=&space;\mathbf{w}&space;-&space;\mathbf{gradient}" title="\mathbf{w} = \mathbf{w} - \mathbf{gradient}" /></a>
 
 ### Regularization
 To avoid the case that one weight is too large (overfitting problem), Regularization method will be implemented. There, a L2 Regularization method will be used:
 
-$$ L_2 = \lambda \sum_{i=1}^{n}w_{i}^{2} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=L_2&space;=&space;\lambda&space;\sum_{i=1}^{n}w_{i}^{2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?L_2&space;=&space;\lambda&space;\sum_{i=1}^{n}w_{i}^{2}" title="L_2 = \lambda \sum_{i=1}^{n}w_{i}^{2}" /></a>
 
 Now, the error, or in pther word, the loss value will be:
 
-$$ loss = 0.5 * (y - f(\mathbf{x}))^{2} + \lambda \sum_{i=1}^{n}w_{i}^{2} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=loss&space;=&space;0.5&space;*&space;(y&space;-&space;f(\mathbf{x}))^{2}&space;&plus;&space;\lambda&space;\sum_{i=1}^{n}w_{i}^{2}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?loss&space;=&space;0.5&space;*&space;(y&space;-&space;f(\mathbf{x}))^{2}&space;&plus;&space;\lambda&space;\sum_{i=1}^{n}w_{i}^{2}" title="loss = 0.5 * (y - f(\mathbf{x}))^{2} + \lambda \sum_{i=1}^{n}w_{i}^{2}" /></a>
 
 The gradient will be:
 
-$$ \mathbf{gradient} = \mathbf{x} * (y - f(\mathbf{x})) + 2 * \lambda * \mathbf{w} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{gradient}&space;=&space;\mathbf{x}&space;*&space;(y&space;-&space;f(\mathbf{x}))&space;&plus;&space;2&space;*&space;\lambda&space;*&space;\mathbf{w}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{gradient}&space;=&space;\mathbf{x}&space;*&space;(y&space;-&space;f(\mathbf{x}))&space;&plus;&space;2&space;*&space;\lambda&space;*&space;\mathbf{w}" title="\mathbf{gradient} = \mathbf{x} * (y - f(\mathbf{x})) + 2 * \lambda * \mathbf{w}" /></a>
 
 ### Data Standardization
 The features here have different units, some values can be more than 1000 and the others are only between 0 and 1. This might cause too large weights for some features and too small weights for the others.
 
 In this case, a standardization is helpful:
 
-$$ \mathbf{x} = \frac{\mathbf{x} - \mathbf{mu}}{\mathbf{\sigma}} $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{x}&space;=&space;\frac{\mathbf{x}&space;-&space;\mathbf{mu}}{\mathbf{\sigma}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{x}&space;=&space;\frac{\mathbf{x}&space;-&space;\mathbf{mu}}{\mathbf{\sigma}}" title="\mathbf{x} = \frac{\mathbf{x} - \mathbf{mu}}{\mathbf{\sigma}}" /></a>
 
 where,
 
-$$ \mathbf{mu} = mean(\mathbf{x}) $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{mu}&space;=&space;mean(\mathbf{x})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{mu}&space;=&space;mean(\mathbf{x})" title="\mathbf{mu} = mean(\mathbf{x})" /></a>
 
 and
 
-$$ \mathbf{\sigma} = max(\mathbf{x}) - min(\mathbf{x}) $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{\sigma}&space;=&space;max(\mathbf{x})&space;-&space;min(\mathbf{x})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{\sigma}&space;=&space;max(\mathbf{x})&space;-&space;min(\mathbf{x})" title="\mathbf{\sigma} = max(\mathbf{x}) - min(\mathbf{x})" /></a>
 
 or 
 
-$$ \mathbf{\sigma} = std(\mathbf{x}) $$
+<a href="https://www.codecogs.com/eqnedit.php?latex=\mathbf{\sigma}&space;=&space;std(\mathbf{x})" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\mathbf{\sigma}&space;=&space;std(\mathbf{x})" title="\mathbf{\sigma} = std(\mathbf{x})" /></a>
 
 ## Result
 
