@@ -1,1 +1,1 @@
-jupyter notebook California_House_Value_Modeling.ipynb
+activate workspace && jupyter notebook California_House_Value_Modeling.ipynb
