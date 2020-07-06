@@ -276,9 +276,6 @@ if __name__ == '__main__':
 	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
 	n_iteration = 5000
 
-	mu = X.mean(axis=0)
-	divid = X.max(axis=0) - X.min(axis=0)
-
 	model = LinearRegression(n_iteration, 0.00001, 0.5, 0.0001, 128)
 	model.fit(X, Y)
 
@@ -289,8 +286,8 @@ if __name__ == '__main__':
 	y_pred = model.prediction(x_test)
 
 	error = np.mean(0.5*(y_pred - y_test)**2)
-	print(error) #0.3384877315359696
-	data = [model.w, model.training_errors, mu, divid]
+	print(error) #0.353289660557462
+	data = [model.w, model.training_errors, mus, sigmas]
 
 	with open("./model.pickle", 'wb') as f:
 		pickle.dump(data, f)
