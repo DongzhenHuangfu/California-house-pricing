@@ -48,6 +48,7 @@ class LinearRegression():
             for offset in range(0, m_samples, self.batch_size):
                 self.fit_batch(offset, X, y)
             error = np.mean(0.5 * (self.prediction(X) - y) ** 2)
+            print(error)
             self.training_errors.append(error)
             # print('iter: ',error)
             if error < self.tolerant:
@@ -61,10 +62,10 @@ class LinearRegression():
     	y_pred = self.prediction(x_batch)
     	# Calculate the loss
     	error = np.sum(0.5 * (y_pred - y_batch) ** 2)
-    	loss = error + self.regularization()
+    	# loss = error + self.regularization()
     	# print('batch: ', error, loss)
     	# Calculate the gradient
-    	w_grad = x_batch.T.dot(y_pred - y_batch) + self.alpha * self.w
+    	w_grad = x_batch.T.dot(y_pred - y_batch)# + self.alpha * self.w
     	# Update the weight
     	self.w -= self.learning_rate * w_grad
 
@@ -237,35 +238,38 @@ if __name__ == '__main__':
 
 	house_train, house_test = seperate_random_pandas(0.2, house)
 
-	for i in range(4):
-		max_features = 3
-		iters = 500
-		selected_features, error = SFFS(all_features, house_train, max_features, iters)
-		print(max_features, selected_features, error) #['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
+	# iters = 500
+	# selected_features, error = SFFS(all_features, house_train, max_features, iters)
+	# print(max_features, selected_features, error) #['Longitude'], ['Longitude', 'Latitude'], ['AveBedrms', 'Population', 'Latitude'], ['AveRooms', 'MedInc', 'Population', 'Latitude']
 
 
-	# selected_features = ['AveBedrms', 'AveRooms', 'MedInc', 'Latitude']
-	# X = trans_xi(house_train, selected_features)
-	# Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
-	# n_iteration = 200
+	selected_features = ['AveRooms', 'MedInc', 'Population', 'Latitude']
+	X = trans_xi(house_train, selected_features)
+	Y = house_train['MedHouseVal'].values.reshape((house_train['MedHouseVal'].values.size, 1))
+	n_iteration = 500
 
-	# mu = X.mean(axis=0)
-	# divid = X.max(axis=0) - X.min(axis=0)
+	mu = X.mean(axis=0)
+	divid = X.max(axis=0) - X.min(axis=0)
 
-	# X = standardization(X, mu, divid)
+	X = standardization(X, mu, divid)
+	print(X)
+	print(X.max(axis=0))
+	print(X.min(axis=0))
+	print(abs(X).max(axis=0))
+	print(abs(X).min(axis=0))
 
-	# model = LinearRegression(n_iteration, 0.000001, 0.5, 0.0001, 128)
-	# model.fit(X, Y)
+	model = LinearRegression(n_iteration, 0.001, 0.5, 0.0001, 128)
+	model.fit(X, Y)
 
-	# x_test = trans_xi(house_test, selected_features)
-	# x_test = standardization(x_test, mu, divid)
-	# y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
+	x_test = trans_xi(house_test, selected_features)
+	x_test = standardization(x_test, mu, divid)
+	y_test = house_test['MedHouseVal'].values.reshape((house_test['MedHouseVal'].values.size, 1))
 
-	# y_pred = model.prediction(x_test)
+	y_pred = model.prediction(x_test)
 
-	# error = np.mean(0.5*(y_pred - y_test)**2)
-	# print(error) #0.3384877315359696
-	# data = [model.w, model.training_errors, mu, divid]
+	error = np.mean(0.5*(y_pred - y_test)**2)
+	print(error) #0.3384877315359696
+	data = [model.w, model.training_errors, mu, divid]
 
-	# with open("./model.pickle", 'wb') as f:
-	# 	pickle.dump(data, f)
+	with open("./model.pickle", 'wb') as f:
+		pickle.dump(data, f)
